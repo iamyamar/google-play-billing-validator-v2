@@ -1,5 +1,5 @@
-const request = require('google-oauth-jwt').requestWithJWT();
-const util = require('util');
+const request = require("google-oauth-jwt").requestWithJWT();
+const util = require("util");
 
 module.exports = Verifier;
 
@@ -11,46 +11,62 @@ function Verifier(options) {
 }
 
 Verifier.prototype.verifyINAPP = function (receipt) {
-  this.options.method = 'get';
+  this.options.method = "get";
   this.options.body = "";
   this.options.json = false;
-  
-  let urlPattern = "https://www.googleapis.com/androidpublisher/v3/applications/%s/purchases/subscriptionsv2/tokens/%s";
-  let finalUrl = ""
+
+  let urlPattern =
+    "https://www.googleapis.com/androidpublisher/v3/applications/%s/purchases/products/%s/tokens/%s";
   if ("developerPayload" in receipt) {
-    urlPattern = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/%s/purchases/subscriptions/%s/tokens/%s";
     urlPattern += ":acknowledge";
     this.options.body = {
-      "developerPayload": receipt.developerPayload
-    }
-    this.options.method = 'post';
+      developerPayload: receipt.developerPayload,
+    };
+    this.options.method = "post";
     this.options.json = true;
-    finalUrl = util.format(urlPattern, encodeURIComponent(receipt.packageName), encodeURIComponent(receipt.productId), encodeURIComponent(receipt.purchaseToken));
-  } else {
-     finalUrl = util.format(urlPattern, encodeURIComponent(receipt.packageName), encodeURIComponent(receipt.purchaseToken));
-  }  
- 
-  
-  return this.verify(finalUrl)
+  }
+  let finalUrl = util.format(
+    urlPattern,
+    encodeURIComponent(receipt.packageName),
+    encodeURIComponent(receipt.productId),
+    encodeURIComponent(receipt.purchaseToken)
+  );
+
+  return this.verify(finalUrl);
 };
 
 Verifier.prototype.verifySub = function (receipt) {
-  this.options.method = 'get';
+  this.options.method = "get";
   this.options.body = "";
   this.options.json = false;
-  
-  let urlPattern = "https://www.googleapis.com/androidpublisher/v3/applications/%s/purchases/subscriptions/%s/tokens/%s";
+
+  let urlPattern =
+    "https://www.googleapis.com/androidpublisher/v3/applications/%s/purchases/subscriptionsv2/tokens/%s";
+  let finalUrl = "";
   if ("developerPayload" in receipt) {
+    urlPattern =
+      "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/%s/purchases/subscriptions/%s/tokens/%s";
     urlPattern += ":acknowledge";
     this.options.body = {
-      "developerPayload": receipt.developerPayload
-    }
-    this.options.method = 'post';
+      developerPayload: receipt.developerPayload,
+    };
+    this.options.method = "post";
     this.options.json = true;
+    finalUrl = util.format(
+      urlPattern,
+      encodeURIComponent(receipt.packageName),
+      encodeURIComponent(receipt.productId),
+      encodeURIComponent(receipt.purchaseToken)
+    );
+  } else {
+    finalUrl = util.format(
+      urlPattern,
+      encodeURIComponent(receipt.packageName),
+      encodeURIComponent(receipt.purchaseToken)
+    );
   }
-  let finalUrl = util.format(urlPattern, encodeURIComponent(receipt.packageName), encodeURIComponent(receipt.productId), encodeURIComponent(receipt.purchaseToken));
-  
-  return this.verify(finalUrl)
+
+  return this.verify(finalUrl);
 };
 
 function isValidJson(string) {
@@ -71,10 +87,9 @@ Verifier.prototype.verify = function (finalUrl) {
     jwt: {
       email: this.options.email,
       key: this.options.key,
-      scopes: ['https://www.googleapis.com/auth/androidpublisher']
-    }
+      scopes: ["https://www.googleapis.com/auth/androidpublisher"],
+    },
   };
-
 
   return new Promise(function (resolve, reject) {
     request(options, function (err, res, body) {
@@ -94,17 +109,17 @@ Verifier.prototype.verify = function (finalUrl) {
 
         reject(resultInfo);
       } else {
-
         let obj = {
-          "error": {
-            "code": res.statusCode,
-            "message": "Invalid response, please check 'Verifier' configuration or the statusCode above"
-          }
+          error: {
+            code: res.statusCode,
+            message:
+              "Invalid response, please check 'Verifier' configuration or the statusCode above",
+          },
         };
         if (res.statusCode === 204) {
           obj = {
-            "code": res.statusCode,
-            "message": "Acknowledged Purchase Successfully"
+            code: res.statusCode,
+            message: "Acknowledged Purchase Successfully",
           };
         }
 
@@ -121,7 +136,6 @@ Verifier.prototype.verify = function (finalUrl) {
           resultInfo.payload = obj;
 
           resolve(resultInfo);
-
         } else {
           // Error
           let errorMessage = obj.error.message;
@@ -133,9 +147,7 @@ Verifier.prototype.verify = function (finalUrl) {
 
           reject(resultInfo);
         }
-
       }
     });
-
-  })
+  });
 };

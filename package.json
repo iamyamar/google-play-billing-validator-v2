@@ -1,5 +1,5 @@
 {
-  "name": "google-play-billing-validator",
+  "name": "google-play-billing-validator-v2",
   "version": "2.1.4",
   "description": "Server side for (Node.js) solution to validate Google Play Purchases and Subscriptions",
   "main": "index.js",
@@ -20,8 +20,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Deishelon/google-play-billing-validator"
+    "url": "git+https://github.com/iamyamar/google-play-billing-validator-v2"
   },
-  "author": "Deishelon",
+  "author": "Yash kumar",
   "license": "ISC"
 }
