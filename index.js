@@ -15,16 +15,21 @@ Verifier.prototype.verifyINAPP = function (receipt) {
   this.options.body = "";
   this.options.json = false;
   
-  let urlPattern = "https://www.googleapis.com/androidpublisher/v3/applications/%s/purchases/products/%s/tokens/%s";
+  let urlPattern = "https://www.googleapis.com/androidpublisher/v3/applications/%s/purchases/subscriptionsv2/tokens/%s";
+  let finalUrl = ""
   if ("developerPayload" in receipt) {
+    urlPattern = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/%s/purchases/subscriptions/%s/tokens/%s";
     urlPattern += ":acknowledge";
     this.options.body = {
       "developerPayload": receipt.developerPayload
     }
     this.options.method = 'post';
     this.options.json = true;
-  }
-  let finalUrl = util.format(urlPattern, encodeURIComponent(receipt.packageName), encodeURIComponent(receipt.productId), encodeURIComponent(receipt.purchaseToken));
+    finalUrl = util.format(urlPattern, encodeURIComponent(receipt.packageName), encodeURIComponent(receipt.productId), encodeURIComponent(receipt.purchaseToken));
+  } else {
+     finalUrl = util.format(urlPattern, encodeURIComponent(receipt.packageName), encodeURIComponent(receipt.purchaseToken));
+  }  
+ 
   
   return this.verify(finalUrl)
 };
